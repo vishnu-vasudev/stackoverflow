@@ -8,9 +8,9 @@ router = routers.DefaultRouter()
 router.register("questions", QuestionAPI)
 
 urlpatterns = [
-    path('display', display, name = 'display'),
+    path('', display, name = 'display'),
     path('api', include(router.urls)),
     path('latest', latest, name = 'latest'),
-    path('', views.user_login, name = 'user-login'),
+    path('user-login', views.user_login, name = 'user-login'),
     path('search', views.search, name = 'search'),
 ]
