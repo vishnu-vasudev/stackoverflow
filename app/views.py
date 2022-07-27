@@ -6,11 +6,12 @@ from .models import Question,User
 from .serializer import QuestionSerializer
 import requests
 import json
+from django.core.paginator import Paginator
 
 
 
-def index(request):
-    return render(request, 'index.html')
+def display(request):
+    return render(request, 'display.html')
 
 class QuestionAPI(viewsets.ModelViewSet):
     queryset = Question.objects.all()
@@ -28,7 +29,7 @@ def latest(request):
     data = Question.objects.all()
     return render(request, 'home.html', {'data':data})
 
-def user_reg(request):
+def user_login(request):
     msg = ''
     if request.method == 'POST':
         username = request.POST['username']
@@ -36,31 +37,18 @@ def user_reg(request):
         try:
             log = User.objects.get(username = username, password = password)
             request.session['user_id'] =log.id     
-            return redirect('index')
+            return redirect('display')
         except:
             msg = 'Invalid data'
-    return render(request, 'user-reg.html', {'msg':msg})
+    return render(request, 'user-login.html', {'msg':msg})
 
-def check(request):
-    dat=[]
-    c=0
-    msg=''
-    if request.method == 'POST':
-        search = request.POST['search']
-        resp = requests.get("https://api.stackexchange.com/2.3/search?order=desc&sort=activity&intitle=Search&site=stackoverflow")
+def search(request):
+    message = ''
+    search = request.GET['search']
+    if search == '':
+        return render(request, 'display.html')
+    else:
+        resp = requests.get("https://api.stackexchange.com/2.3/search?order=desc&sort=activity&intitle="+ search + "&site=stackoverflow")
         jsonObject = resp.json()
-        return render(request, 'index.html', {'obj':jsonObject})
-
-        # ob = Question.objects.all()
-        # for i in ob:
-        #     c=1
-        #     qtn = i.question.split()
-        #     if search in qtn:
-        #         dat.append(i.question)
-        # if c == 0:
-        #     print('hi')
-        #     msg = "No data"
-        #     return render('index.html', {'msg':msg})
-        # else:
-            
-        #     return render('index.html', {'dat':dat})
+        return render(request, 'display.html', {'obj':jsonObject['items']})
+        
